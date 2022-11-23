@@ -2,7 +2,7 @@
 ipath="."
 
 function walk() {
-    include_path=("${ipath}/core")
+    include_path=("${ipath}/spider_common")
     for d in `find ${1}`
     do
         if [[ $d = $1 ]];then
@@ -18,6 +18,8 @@ function walk() {
                 `$c`
                 if [ $? -eq 0 ];then
                     echo "$c ==> $?"
+                else
+                    exit -1
                 fi
 
             fi
@@ -33,7 +35,7 @@ function walk_path() {
     fi
 }
 
-paths=("./proto" "./core/proto" "./commodity" "./common" "./dishes")
+paths=("./proto")
 
 for path in ${paths[@]};
 do

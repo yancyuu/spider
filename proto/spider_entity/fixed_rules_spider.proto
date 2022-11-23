@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "spider_common/proto/spider/spider.proto";
+import "spider_common/proto/spider/parse_setting.proto";
+// 解析数据的数据格式
+// 固定规则的spider
+message FixedRulesSpiderMessage {
+  enum FixedRulesSpiderMessageStatus {
+    // 已经使用
+    CREATED = 0;
+    // 可以使用
+    DELETED = 1;
+}
+  // 唯一id
+  string id = 1;
+  // 一个目标spider
+  SpiderMessage spider= 2;
+  // 创建时间
+  int32 create_time = 3;
+  int32 delete_time = 4;
+  FixedRulesSpiderMessageStatus status = 5;
+  // 解析规则:对应每一步的配置
+  ParseSettingMessage parse_settings = 6;
+}
