@@ -19,7 +19,8 @@ class FixedRulesSpiderMessageManager(ManagerBase):
         return self._da_helper
 
     @staticmethod
-    def create_fixed_rules_spider(fixed_rules_spider):
+    def create_fixed_rules_spider():
+        fixed_rules_spider = fixed_rules_spider_pb.FixedRulesSpiderMessage()
         fixed_rules_spider.id = generate_common_id()
         fixed_rules_spider.status = fixed_rules_spider_pb.FixedRulesSpiderMessage.FixedRulesSpiderMessageStatus.CREATED
         fixed_rules_spider.create_time = int(time.time())
@@ -39,6 +40,9 @@ class FixedRulesSpiderMessageManager(ManagerBase):
             status=status
         )
         return fixed_rules_spiders
+
+    async def delete_fixed_rules_spiders(self, fixed_rules_spider):
+        self.__update_status(fixed_rules_spider, fixed_rules_spider_pb.FixedRulesSpiderMessageStatus.DELETED)
 
     async def add_or_update_fixed_rules_spider(self, fixed_rules_spider):
         await self.da_helper.add_or_update_fixed_rules_spider(fixed_rules_spider)

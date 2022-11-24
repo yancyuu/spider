@@ -37,7 +37,8 @@ class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
         self.__set_matcher_not_delete_status(matcher)
         if not matcher:
             return []
-        return await self._fixed_rules_spider_collection.find(matcher)
+        fixed_rules_spiders = await self._fixed_rules_spider_collection.find(matcher)
+        return protobuf_transformer.batch_protobuf_to_dict(fixed_rules_spiders)
 
     @staticmethod
     def __set_matcher_ids(matcher, ids):
