@@ -2,7 +2,6 @@
 
 from controller.controller_base import ControllerBase
 from common_sdk.data_transform import protobuf_transformer
-from spider_sdk.builder.spider_builder import SpiderBuilder
 from service import errors
 from manager.fixed_rules_spider_manager import FixedRulesSpiderMessageManager
 

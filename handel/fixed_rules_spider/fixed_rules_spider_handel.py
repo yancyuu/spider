@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from common_sdk.logging.logger import logger
 from common_sdk.data_transform import protobuf_transformer
-from spider_common.spider_sdk.client.spider_client import SpiderClient
-from spider_common.spider_sdk.builder.spider_builder import SpiderBuilder
 from manager.fixed_rules_spider_manager import FixedRulesSpiderMessageManager
-import proto.spider_entity.fixed_rules_spider_pb2 as fixed_rules_spider_pb
 
 '''
     用于聚合业务层的操作
