@@ -131,7 +131,7 @@ vim .env
 
 其次运行边车服务作为服务网格 
 
-    dapr run --app-id spider-actor --app-port 3000 --dapr-http-port 3500
+    dapr run --app-id spider-actor --app-port 3000 --dapr-http-port 3501
 
 然后运行docker容器（记得修改挂载地址）
 

@@ -1,6 +1,6 @@
 from common_sdk.system.sys_env import get_env
 from common_sdk.base_class.singleton import SingletonMetaThreadSafe
-from spider_common.spider_sdk.client.actor_proxy_client import ActorProxyClient
+from spider_sdk.client.actor_proxy_client import ActorProxyClient
 
 '''
 用来调度异步任务

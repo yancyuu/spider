@@ -4,6 +4,7 @@ load_dotenv(verbose=True)
 from dapr.ext.fastapi import DaprActor
 from dapr.conf import settings
 from fastapi import FastAPI
+from service.init_blueprint import init_blueprint
 from handel.fixed_rules_spider.fixed_rules_spider_actor import FixedRulesSpiderActor
 import json
 import uvicorn
@@ -36,10 +37,11 @@ json._default_encoder = UJSONEncoder(
 )
 
 app = FastAPI(title=f'spider-actor-service')
-
+init_blueprint(app)
 app.debug = True
 app.json_encoder = UJSONEncoder
 settings.DAPR_RUNTIME_HOST = "192.168.1.10"
+settings.DAPR_HTTP_PORT = 3501
 # Add Dapr Actor Extension
 actor = DaprActor(app)
 

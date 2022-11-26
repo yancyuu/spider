@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "spider_common/proto/spider/spider.proto";
 import "spider_common/proto/spider/parse_setting.proto";
 // 解析数据的数据格式
 // 固定规则的spider
@@ -8,17 +7,35 @@ message FixedRulesSpiderMessage {
   enum FixedRulesSpiderMessageStatus {
     // 已经使用
     CREATED = 0;
+    // 需要重试
+    RETRY = 1;
+    // 完成
+    FINISH = 2;
     // 可以使用
-    DELETED = 1;
+    DELETED = 3;
 }
+  enum RequestMethod {
+    GET= 0;
+    POST = 1;
+  }
   // 唯一id
   string id = 1;
-  // 一个目标spider
-  SpiderMessage spider= 2;
+  // 爬虫名称
+  string name = 2;
+  // 目标url
+  string target_url = 3;
   // 创建时间
-  int32 create_time = 3;
-  int32 delete_time = 4;
-  FixedRulesSpiderMessageStatus status = 5;
+  int32 create_time = 4;
+  int32 delete_time = 5;
+  // 重试时间
+  int64 retry_time = 6;
+  // 完成时间
+  int64 finish_time = 7;
+  FixedRulesSpiderMessageStatus status = 8;
   // 解析规则:对应每一步的配置
-  ParseSettingMessage parse_settings = 6;
+  repeated ParseSettingMessage parse_settings = 9;
+  // 请求方法
+  RequestMethod request_method = 10;
+  // 步骤:根据解析配置中的步骤计算
+  int32 step = 11;
 }

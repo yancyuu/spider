@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import jsonify
+from starlette.responses import JSONResponse
 
 from service import error_codes
 
@@ -24,7 +24,8 @@ def jsonify_response(data=None, status_response=None):
             "data": data
         }
     ret.update(**status_response)
-    return jsonify(ret)
+    print("ret====>{}".format(ret))
+    return JSONResponse(content=ret)
 
 
 def protobuf_response(obj=None):

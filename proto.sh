@@ -35,7 +35,7 @@ function walk_path() {
     fi
 }
 
-paths=("./proto")
+paths=("./proto" "./spider_common/proto")
 
 for path in ${paths[@]};
 do

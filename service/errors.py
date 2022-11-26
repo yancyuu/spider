@@ -29,4 +29,4 @@ class CustomMessageError(Error):
 
 class PageNotFound(Error):
     def __init__(self):
-        super().__init__(err=error_codes.PAGE_NOT_FOUND, message=message)
+        super().__init__(err=error_codes.PAGE_NOT_FOUND)

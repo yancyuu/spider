@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from flask import request
-
-from factory.manager.brand_factory import BrandManagerFactory
-from factory.manager.store_factory import StoreManagerFactory
-from base_cls import BaseCls
+from fastapi import Request
 
 
-class ControllerBase(BaseCls):
+class ControllerBase:
     """所有支持API针对相应对象进行相关操作的Controller基类。"""
 
     @property
@@ -17,10 +13,6 @@ class ControllerBase(BaseCls):
     @property
     def user_id(self):
         return self._user_id
-
-    @property
-    def token(self):
-        return self._token
 
     @property
     def op_func_map(self):
@@ -34,7 +26,7 @@ class ControllerBase(BaseCls):
     def brand_id(self):
         return self.get_json_param("brandId")
 
-    def __init__(self):
+    def __init__(self, request: Request):
         self._request = request
         self._user_id = None
         self._brand = None
@@ -51,17 +43,19 @@ class ControllerBase(BaseCls):
     def get_header_param(self, attr, default=None):
         return self.request.headers.get(attr, default)
 
-    def get_json_param(self, attr, default=None):
-        if not self.request.is_json:
+    async def get_json_param(self, attr, default=None):
+        request_json = await self.request.json()
+        print("请求参数--->{}".format(request_json))
+        if not request_json:
             return default
-        return self.request.json.get(attr, default)
+        return request_json.get(attr)
 
-    def do_operation(self, operation):
+    async def do_operation(self, operation):
         if not self.check_permission(operation):
             raise PermissionError('Permission denied.')
         if operation not in self.op_func_map:
             raise NotImplementedError('Operation not implemented: {}'.format(operation))
-        return self.op_func_map[operation]()
+        return await self.op_func_map[operation]()
 
     def check_permission(self, operation, request_json=None):
         return True
