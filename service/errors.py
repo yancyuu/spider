@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from service import error_codes
+from handel import error_codes
 
 
 class Error(Exception):
@@ -23,8 +23,8 @@ class Error(Exception):
 
 
 class CustomMessageError(Error):
-    def __init__(self):
-        super().__init__(err=error_codes.CUSTOM_MESSAGE_ERROR)
+    def __init__(self, message):
+        super().__init__(err=error_codes.CUSTOM_MESSAGE_ERROR, message=message)
 
 
 class PageNotFound(Error):

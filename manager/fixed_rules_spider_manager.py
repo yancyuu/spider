@@ -2,12 +2,9 @@
 
 import time
 from common_sdk.util.id_generator import generate_common_id
-from common_sdk.data_transform import protobuf_transformer
 from dao.fixed_rules_spider_da_helper import FixedRulesSpiderMessageDAHelper
 from manager.manager_base import ManagerBase, ignore_none_param
 import proto.spider_entity.fixed_rules_spider_pb2 as fixed_rules_spider_pb
-import spider_common.proto.spider.spider_pb2 as spider_pb
-import spider_common.proto.spider.parse_setting_pb2 as parse_setting_pb
 
 
 class FixedRulesSpiderMessageManager(ManagerBase):
@@ -32,15 +29,16 @@ class FixedRulesSpiderMessageManager(ManagerBase):
     async def get_fixed_rules_spider(self, id=None):
         return await self.da_helper.get_fixed_rules_spider(id=id)
 
-    def update_fixed_rules_spider(self, fixed_rules_spider, status=None, spider=None, parse_settings=None, name=None):
+    def update_fixed_rules_spider(self, fixed_rules_spider, status=None, parse_setting_ids=None, target_url=None, name=None):
         self.__update_status(fixed_rules_spider, status)
         self.__update_name(fixed_rules_spider, name)
-        self.__update_spider(fixed_rules_spider, spider)
-        self.__update_parse_settings(fixed_rules_spider, parse_settings)
+        self.__update_target_url(fixed_rules_spider, target_url)
+        self.__update_parse_setting_ids(fixed_rules_spider, parse_setting_ids)
 
-    async def list_fixed_rules_spiders(self, status=None):
+    async def list_fixed_rules_spiders(self, status=None, name=None):
         fixed_rules_spiders = await self.da_helper.list_fixed_rules_spiders(
-            status=status
+            status=status,
+            name=name
         )
         return fixed_rules_spiders
 
@@ -63,22 +61,16 @@ class FixedRulesSpiderMessageManager(ManagerBase):
         fixed_rules_spider.status = status
 
     @ignore_none_param
-    def __update_spider(self, fixed_rules_spider, spider):
-        fixed_rules_spider.spider.CopyFrom(protobuf_transformer.dict_to_protobuf(spider, spider_pb.SpiderMessage))
+    def __update_target_url(self, fixed_rules_spider, target_url=None):
+        fixed_rules_spider.target_url = target_url
 
     @ignore_none_param
-    def __update_name(self, fixed_rules_spider, name):
-        fixed_rules_spider.name = name
+    def __update_name(self, fixed_rules_spider, name=None):
+        fixed_rules_spider.v = name
 
     @ignore_none_param
-    def __update_parse_settings(self, fixed_rules_spider, parse_settings):
-        while fixed_rules_spider.parse_settings:
-            fixed_rules_spider.parse_settings.pop()
-        for parse_setting in parse_settings:
-            parse_setting = protobuf_transformer.dict_to_protobuf(parse_setting, parse_setting_pb.ParseSettingMessage)
-            fixed_rules_spider.parse_settings.append(parse_setting)
-
-
-
-
-
+    def __update_parse_setting_ids(self, fixed_rules_spider, parse_setting_ids=None):
+        while fixed_rules_spider.parse_setting_ids:
+            fixed_rules_spider.parse_setting_ids.pop()
+        for parse_setting_id in parse_setting_ids:
+            fixed_rules_spider.parse_setting_ids.append(parse_setting_id)

@@ -45,8 +45,8 @@ def init_blueprint(app):
     def error_404(request: Request, exc: 404):
         return jsonify_response(status_response=error_codes.PAGE_NOT_FOUND)
 
-    @app.exception_handler(Exception)
-    def error_handler(request: Request, exc: Exception):
+    @app.exception_handler(errors.Error)
+    def error_handler(request: Request, exc: errors.Error):
         logger.exception(exc)
         if isinstance(exc, errors.Error):
             return jsonify_response(status_response=(exc.errcode, exc.errmsg))

@@ -33,7 +33,7 @@ message FixedRulesSpiderMessage {
   int64 finish_time = 7;
   FixedRulesSpiderMessageStatus status = 8;
   // 解析规则:对应每一步的配置
-  repeated ParseSettingMessage parse_settings = 9;
+  repeated string parse_setting_ids = 9;
   // 请求方法
   RequestMethod request_method = 10;
   // 步骤:根据解析配置中的步骤计算

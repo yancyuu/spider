@@ -31,14 +31,15 @@ class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
         fixed_rules_spider = await self._fixed_rules_spider_collection.find_one(matcher)
         return protobuf_transformer.dict_to_protobuf(fixed_rules_spider, fixed_rules_spider_pb.FixedRulesSpiderMessage)
 
-    async def list_fixed_rules_spiders(self, status=None):
+    async def list_fixed_rules_spiders(self, status=None, name=None):
         matcher = {}
         self.__set_matcher_status(matcher, status)
+        self.__set_matcher_name(matcher, name)
         self.__set_matcher_not_delete_status(matcher)
         if not matcher:
             return []
         fixed_rules_spiders = await self._fixed_rules_spider_collection.find(matcher)
-        return protobuf_transformer.batch_protobuf_to_dict(fixed_rules_spiders)
+        return protobuf_transformer.batch_dict_to_protobuf(fixed_rules_spiders, fixed_rules_spider_pb.FixedRulesSpiderMessage)
 
     @staticmethod
     def __set_matcher_ids(matcher, ids):
@@ -61,6 +62,10 @@ class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
         elif isinstance(status, fixed_rules_spider_pb.FixedRulesSpiderMessage.FixedRulesSpiderMessageStatus):
             matcher.update({"status": fixed_rules_spider_pb.FixedRulesSpiderMessage.FixedRulesSpiderMessageStatus.Name(status)})
         matcher.update({"status": status})
+
+    @staticmethod
+    def __set_matcher_name(matcher, name):
+        matcher.update({"name": name})
 
     @staticmethod
     def __set_matcher_not_delete_status(matcher):
