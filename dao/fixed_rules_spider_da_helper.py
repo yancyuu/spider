@@ -36,6 +36,7 @@ class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
         self.__set_matcher_status(matcher, status)
         self.__set_matcher_name(matcher, name)
         self.__set_matcher_not_delete_status(matcher)
+        print("---->{}".format(matcher))
         if not matcher:
             return []
         fixed_rules_spiders = await self._fixed_rules_spider_collection.find(matcher)
@@ -57,14 +58,12 @@ class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
     def __set_matcher_status(matcher, status):
         if status is None:
             return
-        if isinstance(status, str):
-            matcher.update({"status": status})
-        elif isinstance(status, fixed_rules_spider_pb.FixedRulesSpiderMessage.FixedRulesSpiderMessageStatus):
-            matcher.update({"status": fixed_rules_spider_pb.FixedRulesSpiderMessage.FixedRulesSpiderMessageStatus.Name(status)})
         matcher.update({"status": status})
 
     @staticmethod
     def __set_matcher_name(matcher, name):
+        if name is None:
+            return
         matcher.update({"name": name})
 
     @staticmethod

@@ -85,14 +85,14 @@ class FixedRulesSpiderController(ControllerBase):
 
     async def list(self):
         fixed_rules_spiders = await self.manager.list_fixed_rules_spiders(
-            status=self.get_json_param("status")
+            status=await self.get_json_param("status")
         )
         fixed_rules_spiders = protobuf_transformer.batch_protobuf_to_dict(fixed_rules_spiders)
-        data= []
+        data = []
         for fixed_rules_spider in fixed_rules_spiders:
             # 查找配置
-            spider_setting_proxy_client = ActorProxyClient(fixed_rules_spider.id).spider_setting_actor_proxy()
-            res = await spider_setting_proxy_client.ListParseSetting({"ids": fixed_rules_spider["parseSettingIds"]})
+            spider_setting_proxy_client = ActorProxyClient(fixed_rules_spider['id']).spider_setting_actor_proxy()
+            res = await spider_setting_proxy_client.ListParseSettings({"ids": fixed_rules_spider["parseSettingIds"]})
             if res.get("errcode") != 0:
                 continue
             fixed_rules_spider["parseSettings"] = res.get("data")
