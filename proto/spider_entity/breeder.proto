@@ -3,8 +3,8 @@ syntax = "proto3";
 import "spider_common/proto/spider/parse_setting.proto";
 // 解析数据的数据格式
 // 固定规则的spider
-message FixedRulesSpiderMessage {
-  enum FixedRulesSpiderMessageStatus {
+message BreederMessage {
+  enum BreederStatus {
     // 已经使用
     CREATED = 0;
     // 需要重试
@@ -14,10 +14,6 @@ message FixedRulesSpiderMessage {
     // 可以使用
     DELETED = 3;
 }
-  enum RequestMethod {
-    GET= 0;
-    POST = 1;
-  }
   // 唯一id
   string id = 1;
   // 爬虫名称
@@ -31,9 +27,7 @@ message FixedRulesSpiderMessage {
   int64 retry_time = 6;
   // 完成时间
   int64 finish_time = 7;
-  FixedRulesSpiderMessageStatus status = 8;
+  BreederStatus status = 8;
   // 解析规则:对应每一步的配置
   repeated string parse_setting_ids = 9;
-  // 请求方法
-  RequestMethod request_method = 10;
 }

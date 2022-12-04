@@ -1,7 +1,7 @@
 from dapr.actor import ActorInterface, actormethod
 
 
-class FixedRulesSpiderActorInterface(ActorInterface):
+class BreederActorInterface(ActorInterface):
     @actormethod(name="listSpider")
     async def list_spider(self) -> object:
         ...

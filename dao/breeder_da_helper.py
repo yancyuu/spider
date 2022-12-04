@@ -1,37 +1,37 @@
 # -*- coding: utf-8 -*-
 
-import proto.spider_entity.fixed_rules_spider_pb2 as fixed_rules_spider_pb
+import proto.spider_entity.breeder_pb2 as breeder_pb
 
 from dao.constants import DBConstants
 from dao.mongodb_dao_helper import MongodbClientHelper
 from common_sdk.data_transform import protobuf_transformer
 
 
-class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
+class BreederMessageDAHelper(MongodbClientHelper):
     def __init__(self):
         db = DBConstants.MONGODB_SPIDER_DB_NAME
         coll = DBConstants.SPIDER_ENTITY_COLLECTION_NAME
         super().__init__(db, coll)
 
     @property
-    def _fixed_rules_spider_collection(self):
+    def _breeder_collection(self):
         return self
 
-    async def add_or_update_fixed_rules_spider(self, fixed_rules_spider):
-        matcher = {"id": fixed_rules_spider.id}
-        json_data = protobuf_transformer.protobuf_to_dict(fixed_rules_spider)
-        await self._fixed_rules_spider_collection.do_replace(matcher, json_data, upsert=True)
+    async def add_or_update_breeder(self, breeder):
+        matcher = {"id": breeder.id}
+        json_data = protobuf_transformer.protobuf_to_dict(breeder)
+        await self._breeder_collection.do_replace(matcher, json_data, upsert=True)
 
-    async def get_fixed_rules_spider(self, id=None):
+    async def get_breeder(self, id=None):
         matcher = {}
         self.__set_matcher_id(matcher, id)
         self.__set_matcher_not_delete_status(matcher)
         if not matcher:
             return
-        fixed_rules_spider = await self._fixed_rules_spider_collection.find_one(matcher)
-        return protobuf_transformer.dict_to_protobuf(fixed_rules_spider, fixed_rules_spider_pb.FixedRulesSpiderMessage)
+        breeder = await self._breeder_collection.find_one(matcher)
+        return protobuf_transformer.dict_to_protobuf(breeder, breeder_pb.BreederMessage)
 
-    async def list_fixed_rules_spiders(self, status=None, name=None):
+    async def list_breeders(self, status=None, name=None):
         matcher = {}
         self.__set_matcher_status(matcher, status)
         self.__set_matcher_name(matcher, name)
@@ -39,8 +39,8 @@ class FixedRulesSpiderMessageDAHelper(MongodbClientHelper):
         print("---->{}".format(matcher))
         if not matcher:
             return []
-        fixed_rules_spiders = await self._fixed_rules_spider_collection.find(matcher)
-        return protobuf_transformer.batch_dict_to_protobuf(fixed_rules_spiders, fixed_rules_spider_pb.FixedRulesSpiderMessage)
+        breeders = await self._breeder_collection.find(matcher)
+        return protobuf_transformer.batch_dict_to_protobuf(breeders, breeder_pb.BreederMessage)
 
     @staticmethod
     def __set_matcher_ids(matcher, ids):

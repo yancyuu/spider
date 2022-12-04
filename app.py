@@ -5,7 +5,7 @@ from dapr.ext.fastapi import DaprActor
 from dapr.conf import settings
 from fastapi import FastAPI
 from service.init_blueprint import init_blueprint
-from handel.fixed_rules_spider.fixed_rules_spider_actor import FixedRulesSpiderActor
+from handel.breeder.breeder_actor import BreederActor
 import json
 import uvicorn
 import ujson
@@ -49,7 +49,7 @@ actor = DaprActor(app)
 @app.on_event("startup")
 async def startup_event():
     # Register SpiderActor
-    await actor.register_actor(FixedRulesSpiderActor)
+    await actor.register_actor(BreederActor)
 
 
 if __name__ == "__main__":

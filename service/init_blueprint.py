@@ -3,7 +3,7 @@
 from common_sdk.logging.logger import logger
 from service.base_responses import jsonify_response
 from service import error_codes, errors
-from service.fixed_rules_spider_service import _fixed_rules_spider
+from service.breeder_service import _breeder
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from common_sdk.util import context
@@ -38,7 +38,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
 
 def init_blueprint(app):
     blueprints = [
-        _fixed_rules_spider
+        _breeder
     ]
 
     @app.exception_handler(404)

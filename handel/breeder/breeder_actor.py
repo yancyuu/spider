@@ -1,11 +1,11 @@
-from handel.fixed_rules_spider.fixed_rules_spider_handel import FixedRulesSpiderHandel
+from handel.breeder.breeder_handel import BreederSpiderHandel
 import datetime
 from dapr.actor import Actor, Remindable
-from handel.fixed_rules_spider.fixed_rules_spider_actor_interface import FixedRulesSpiderActorInterface
+from handel.breeder.breeder_actor_interface import BreederActorInterface
 from typing import Optional
 
 
-class FixedRulesSpiderActor(Actor, FixedRulesSpiderActorInterface, Remindable):
+class BreederActor(Actor, BreederActorInterface, Remindable):
     """Implements DemoActor actor service
     This shows the usage of the below actor features:
     1. Actor method invocation
@@ -15,20 +15,20 @@ class FixedRulesSpiderActor(Actor, FixedRulesSpiderActorInterface, Remindable):
     """
 
     def __init__(self, ctx, actor_id):
-        super(FixedRulesSpiderActor, self).__init__(ctx, actor_id)
-        self.__handel = FixedRulesSpiderHandel(actor_id)
+        super(BreederActor, self).__init__(ctx, actor_id)
+        self.__handel = BreederSpiderHandel(actor_id)
 
-    async def list_fixed_rules_spiders(self) -> object:
-        """ 展示fixed_rules_spider数据"""
-        return await self.__handel.list_fixed_rules_spiders()
+    async def list_breeders(self) -> object:
+        """ 展示breeder数据"""
+        return await self.__handel.list_breeders()
 
-    async def generate_fixed_rules_spider(self, data: dict) -> object:
-        """ 创建一条fixed_rules_spider数据"""
-        return await self.__handel.generate_fixed_rules_spider(data)
+    async def generate_breeder(self, data: dict) -> object:
+        """ 创建一条breeder数据"""
+        return await self.__handel.generate_breeder(data)
 
     async def start_crawling_index(self, data: dict) -> object:
-        """ 开始爬取fixed_rules_spider数据"""
-        return await self.__handel.start_crawling(data)
+        """ 开始爬取breeder数据"""
+        return await self.__handel.start_crawling_index(data)
 
     async def _on_activate(self) -> None:
         """An callback which will be called whenever actor is activated."""
