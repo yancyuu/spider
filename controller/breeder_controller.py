@@ -4,7 +4,10 @@ from controller.controller_base import ControllerBase
 from common_sdk.data_transform import protobuf_transformer
 from service import errors
 from spider_sdk.client.actor_proxy_client import ActorProxyClient
+from spider_sdk.client.breeder_client import BreederClient
+from spider_sdk.builder.breeder_builder import BreederBuilder
 from manager.breeder_manager import BreederManager
+from lxml import etree
 
 
 class BreederController(ControllerBase):
@@ -16,8 +19,18 @@ class BreederController(ControllerBase):
 
     def __init__(self, req):
         super().__init__(req)
-        self._OP_FUNC_MAP.update({})
+        self.spider_setting_proxy_client = None
+        self._breeder_builder = None
+        self._OP_FUNC_MAP.update({
+            "start_reproduce": self.start_reproduce
+        })
         self._manager = None
+
+    @property
+    def breeder_builder(self):
+        if self._breeder_builder is None:
+            self._breeder_builder = BreederBuilder()
+        return self._breeder_builder
 
     async def get(self):
         breeder = await self.manager.get_breeder(
@@ -97,3 +110,60 @@ class BreederController(ControllerBase):
             breeder["parseSettings"] = res.get("data")
             data.append(breeder)
         return data
+
+    async def start_reproduce(self):
+        id = await self.get_json_param("id")
+        if not id:
+            raise errors.CustomMessageError("未输入爬虫id")
+        breeder = protobuf_transformer.protobuf_to_dict(await self.manager.get_breeder(id=id))
+        if not breeder:
+            raise errors.CustomMessageError("此爬虫被删除或者不存在")
+        # 查找配置
+        self.spider_setting_proxy_client = ActorProxyClient(breeder['id']).spider_setting_actor_proxy()
+        res = await self.spider_setting_proxy_client.ListParseSettings({"ids": breeder["parseSettingIds"]})
+        if res.get("errcode") != 0 or res.get("data") is None:
+            return
+        parse_settings = res.get("data")
+        if parse_settings:
+            return
+        index_url = breeder["targetUrl"]
+        # 发起一个请求
+        self.breeder_builder.url = index_url
+        response = await BreederClient().get(self.breeder_builder)
+
+        # 1. 取第一个配置作为此爬虫的初始配置
+        index_setting = parse_settings[0]
+        # 2. 查看这个配置有无下一页：若有则复制出匹配上规则的爬虫
+        await self.__create_spider_by_next_page(index_url, index_setting, response)
+        # 3. 根据此初始配置进行解析
+
+    async def __create_spider_by_next_page(self, index_url, index_setting, response):
+        """
+            用于通过配置来生成爬虫
+        :param index_url: 母体爬虫url
+        :param index_setting: 此爬虫应用的当前配置
+        :param response: 此页面返回
+        :return:
+        """
+        if index_setting.get("nextSpiderRules") and index_setting.get("parseType") == "XPATH":
+            doc = etree.HTML(response.text)
+            next_page_urls = doc.xpath(index_setting.get("nextSpiderRules"))
+            # 繁殖新爬虫，url为下一页，配置为相同配置
+            for next_page_url in next_page_urls:
+                if next_page_url == index_url:
+                    continue
+                breeder = self.manager.create_breeder()
+                self.manager.update_breeder(breeder,
+                                            target_url=next_page_url,
+                                            parse_setting_ids=breeder["parseSettingIds"],
+                                            name=breeder["name"] + "下一页")
+            # 生成新爬虫完毕，将此配置改为无下一页
+            index_setting["nextSpiderRules"] = ""
+            await self.spider_setting_proxy_client.UpdateParseSettings(index_setting)
+
+    async def __parse_spider(self, index_setting, response):
+        if index_setting.get("parseRules") and index_setting.get("parseType") == "XPATH":
+            doc = etree.HTML(response.text)
+            parsed_data = doc.xpath(index_setting.get("parseRules"))
+            # todo: 将解析完的数据存储起来
+            # todo: 如果还有配置，那么产生新的爬虫
