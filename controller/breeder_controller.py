@@ -116,26 +116,34 @@ class BreederController(ControllerBase):
         if not id:
             raise errors.CustomMessageError("未输入爬虫id")
         breeder = protobuf_transformer.protobuf_to_dict(await self.manager.get_breeder(id=id))
+        await self.__start_parse_by_setting(breeder=breeder)
+
+    async def __start_parse_by_setting(self, breeder=None):
         if not breeder:
             raise errors.CustomMessageError("此爬虫被删除或者不存在")
         # 查找配置
         self.spider_setting_proxy_client = ActorProxyClient(breeder['id']).spider_setting_actor_proxy()
         res = await self.spider_setting_proxy_client.ListParseSettings({"ids": breeder["parseSettingIds"]})
+        print("setting--->{}".format(res))
         if res.get("errcode") != 0 or res.get("data") is None:
             return
         parse_settings = res.get("data")
-        if parse_settings:
+        if not parse_settings:
             return
         index_url = breeder["targetUrl"]
         # 发起一个请求
         self.breeder_builder.url = index_url
         response = await BreederClient().get(self.breeder_builder)
+        print("response--->{}".format(response))
 
         # 1. 取第一个配置作为此爬虫的初始配置
         index_setting = parse_settings[0]
         # 2. 查看这个配置有无下一页：若有则复制出匹配上规则的爬虫
+        print("index_setting--->{}".format(index_setting))
+
         await self.__create_spider_by_next_page(index_url, index_setting, response)
         # 3. 根据此初始配置进行解析
+        await self.__parse_spider(index_setting, response)
 
     async def __create_spider_by_next_page(self, index_url, index_setting, response):
         """
@@ -157,13 +165,28 @@ class BreederController(ControllerBase):
                                             target_url=next_page_url,
                                             parse_setting_ids=breeder["parseSettingIds"],
                                             name=breeder["name"] + "下一页")
-            # 生成新爬虫完毕，将此配置改为无下一页
-            index_setting["nextSpiderRules"] = ""
-            await self.spider_setting_proxy_client.UpdateParseSettings(index_setting)
+                await self.manager.add_or_update_breeder(breeder)
+                # 解析新生成的爬虫（todo:之后考虑放到异步任务中）
+                await self.__start_parse_by_setting(breeder)
+            # 生成新爬虫完毕，若不是重复模式配置改为无下一页
+            if not index_setting.get("enableNextSpiderRepeated"):
+                index_setting["nextSpiderRules"] = ""
+            return await self.spider_setting_proxy_client.UpdateParseSettings(index_setting)
 
-    async def __parse_spider(self, index_setting, response):
+    async def __parse_spider(self, index_setting, response, parse_setting_ids):
         if index_setting.get("parseRules") and index_setting.get("parseType") == "XPATH":
             doc = etree.HTML(response.text)
             parsed_data = doc.xpath(index_setting.get("parseRules"))
+            print("parsed_data--->{}".format(parsed_data))
             # todo: 将解析完的数据存储起来
-            # todo: 如果还有配置，那么产生新的爬虫
+            # todo: 校验parsed_data为url
+            if len(parse_setting_ids) == 1:
+                return
+            breeder = self.manager.create_breeder()
+            self.manager.update_breeder(breeder,
+                                        target_url=parsed_data,
+                                        parse_setting_ids=breeder["parseSettingIds"],
+                                        name=breeder["name"] + str(len(parse_setting_ids) - 1) + "子爬虫")
+            await self.manager.add_or_update_breeder(breeder)
+            # 解析新生成的爬虫（todo:之后考虑放到异步任务中）
+            await self.__start_parse_by_setting(breeder)

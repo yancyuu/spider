@@ -14,7 +14,7 @@ class InitTask(metaclass=SingletonMetaThreadSafe):
         actor_client = ActorProxyClient("proxy_task")
         if get_env("USE_PROXY_POOL"):
             # Create proxy client
-            actor_proxy = actor_client.create_proxy_actor_proxy()
+            actor_proxy = actor_client.cookie_actor_proxy()
             # 开始生产proxy
             await actor_proxy.GetMyData()
 
@@ -23,6 +23,6 @@ class InitTask(metaclass=SingletonMetaThreadSafe):
         actor_client = ActorProxyClient("cookie_task")
         if get_env("USE_COOKIE_POOL"):
             # Create proxy client
-            actor_proxy = actor_client.create_cookie_actor_proxy()
+            actor_proxy = actor_client.cookie_actor_proxy()
             # 开始生产cookie
             await actor_proxy.GetMyData()
